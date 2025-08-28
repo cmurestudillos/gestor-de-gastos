@@ -32,7 +32,7 @@ Una aplicación web moderna y completa para gestionar múltiples presupuestos pe
 
 ## 🚀 Demo en Vivo
 
-[Ver Demo](https://gestor-de-gastos-multiples.vercel.app) | [Repositorio](https://github.com/tu-usuario/gestor-gastos)
+[Ver Demo](https://gestor-de-gastos-multiples.vercel.app) | [Repositorio](https://github.com/cmurestudillos/gestor-de-gastos)
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -52,7 +52,7 @@ Una aplicación web moderna y completa para gestionar múltiples presupuestos pe
 ### Instalación
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/gestor-gastos-multiples.git
+git clone https://github.com/cmurestudillos/gestor-de-gastos.git
 
 # Navegar al directorio
 cd gestor-de gastos
