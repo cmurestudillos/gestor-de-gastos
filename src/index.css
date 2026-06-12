@@ -1,200 +1,209 @@
-/* Gestor de múltiples presupuestos */
-h1 {
-  text-align: center;
+/* Gestor de Gastos — tema dark fintech sobre PrimeReact lara-dark-teal */
+
+:root {
+  --money-positive: #22c55e;
+  --money-spent: #ef4444;
+  --money-warning: #f59e0b;
+  --money-accent: #facc15;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Layout general */
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0f766e 0%, #111827 100%);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.app-header .pi-wallet {
+  font-size: 2.25rem;
+  color: var(--money-accent);
+}
+
+.app-header h1 {
+  font-size: 1.75rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.app-header p {
+  margin: 0.25rem 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+/* Vista vacía */
 .gestor-vacio {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 4rem 1rem;
 }
 
-.mensaje-vacio h2 {
-  color: #333;
-  margin-bottom: 1rem;
+.gestor-vacio h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.mensaje-vacio p {
-  color: #666;
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
+.gestor-vacio p {
+  color: var(--text-color-secondary);
+  margin-bottom: 1.5rem;
 }
 
+/* Panel de presupuestos */
 .header-gestor {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.btn-nuevo {
-  font-size: 0.9rem;
+.header-gestor h2 {
+  font-size: 1.4rem;
 }
 
 .grid-presupuestos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .tarjeta-presupuesto {
-  background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  position: relative;
+  height: 100%;
+  border-radius: 16px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .tarjeta-presupuesto:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5);
 }
 
 .tarjeta-presupuesto.activo {
-  border-color: #007bff;
-  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  box-shadow: 0 0 0 2px var(--primary-color);
 }
 
 .header-tarjeta {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .header-tarjeta h3 {
-  margin: 0;
-  color: #333;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.badge-activo {
-  background-color: #007bff;
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .stats-presupuesto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   margin-bottom: 1rem;
 }
 
-.stat {
+.stat-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  font-size: 0.92rem;
 }
 
-.stat .label {
-  font-weight: 500;
-  color: #666;
+.stat-row .label {
+  color: var(--text-color-secondary);
 }
 
-.stat .valor {
+.stat-row .valor {
   font-weight: 600;
-  color: #333;
 }
 
-.stat .valor.gastado {
-  color: #dc3545;
+.money-positive {
+  color: var(--money-positive);
 }
 
-.stat .valor.positivo {
-  color: #28a745;
+.money-spent {
+  color: var(--money-spent);
 }
 
-.stat .valor.negativo {
-  color: #dc3545;
-  font-weight: bold;
+.money-negative {
+  color: var(--money-spent);
+  font-weight: 700;
 }
 
-.progreso-mini {
+.btn-full {
   width: 100%;
-  height: 8px;
-  background-color: #e9ecef;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 1rem;
-}
-
-.barra-progreso-mini {
-  height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 4px;
 }
 
 .info-adicional {
-  margin-bottom: 1rem;
+  margin: 0.75rem 0;
   padding-top: 0.5rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .info-adicional small {
-  color: #666;
+  color: var(--text-color-secondary);
   font-size: 0.8rem;
 }
 
 .acciones-presupuesto {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  margin-top: 0.75rem;
 }
 
-.btn-accion {
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-.btn-seleccionar {
-  background-color: #007bff;
-  color: white;
+.acciones-presupuesto .p-button {
   flex: 1;
 }
 
-.btn-seleccionar:hover {
-  background-color: #0056b3;
-}
-
-.btn-editar {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-editar:hover {
-  background-color: #545b62;
-}
-
-.btn-eliminar-presupuesto {
-  background-color: #dc3545;
-  color: white;
-}
-
-.btn-eliminar-presupuesto:hover {
-  background-color: #c82333;
-}
-
-/* Edición de presupuesto */
+/* Edición inline de presupuesto */
 .edicion-presupuesto {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
-.input-edicion {
+.edicion-presupuesto .p-inputtext,
+.edicion-presupuesto .p-inputnumber {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
 }
 
 .botones-edicion {
@@ -202,332 +211,236 @@ h1 {
   gap: 0.5rem;
 }
 
-.btn-guardar,
-.btn-cancelar {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
+.botones-edicion .p-button {
   flex: 1;
 }
 
-.btn-guardar {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-guardar:hover {
-  background-color: #218838;
-}
-
-.btn-cancelar {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-cancelar:hover {
-  background-color: #545b62;
-}
-
-/* Resumen total */
+/* Resumen general */
 .resumen-total {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
   margin-top: 2rem;
-}
-
-.resumen-total h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
 }
 
 .stats-generales {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .stat-general {
   display: flex;
-  justify-content: space-between;
-  padding: 0.75rem;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-card);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.stat-general strong {
-  color: #333;
+.stat-general .stat-label {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
 }
 
-.stat-general span {
-  color: #007bff;
-  font-weight: 600;
+.stat-general .stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
-/* Navegación */
+/* Navegación dentro de un presupuesto */
 .navegacion {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .navegacion h2 {
-  margin: 0;
-  color: #333;
+  font-size: 1.4rem;
 }
 
-.btn-volver {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 0.9rem;
+.vista-gastos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.btn-volver:hover {
-  background-color: #545b62;
-}
-
-/* Botón eliminar más pequeño */
-.btn-eliminar-pequeno {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  width: 24px;
-  height: 24px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.btn-eliminar-pequeno:hover {
-  background-color: #c82333;
-  transform: scale(1.1);
-} /* Estilos adicionales para la aplicación mejorada */
-
-/* Formulario */
+/* Formularios */
 .campo {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
+}
+
+.campo label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+
+.campo .p-inputtext,
+.campo .p-inputnumber,
+.campo .p-dropdown {
+  width: 100%;
 }
 
 .info-restante {
-  text-align: center;
-  color: #666;
-}
-
-button:disabled {
-  background-color: #ccc !important;
-  cursor: not-allowed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--surface-card);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
 /* Listado de gastos */
-.sin-gastos {
-  text-align: center;
-  color: #666;
-  font-style: italic;
-  padding: 2rem;
-}
-
 .listado-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .total-gastos {
   margin: 0;
-  font-size: 0.9rem;
-  color: #333;
+  font-size: 0.95rem;
+}
+
+.total-gastos strong {
+  color: var(--money-spent);
 }
 
 .filtro-categoria {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 5px;
 }
 
 .filtro-categoria label {
-  margin-right: 0.5rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
 }
 
-/* Items de gasto */
 .gastos-lista {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .gasto-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  background-color: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  padding: 0.85rem 1rem;
+  background: var(--surface-card);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.2s ease;
 }
 
 .gasto-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .gasto-info {
   flex-grow: 1;
-  margin-right: 2rem;
+  margin-right: 1rem;
+  min-width: 0;
 }
 
 .gasto-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .gasto-header h4 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gasto-cantidad {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #dc3545;
+  font-weight: 700;
+  color: var(--money-spent);
+  white-space: nowrap;
 }
 
 .gasto-detalles {
   display: flex;
-  justify-content: space-between;
-  color: #666;
-  font-size: 0.85rem;
-}
-
-.gasto-categoria {
-  background-color: #e9ecef;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-weight: 500;
-}
-
-.btn-eliminar {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
+  gap: 0.6rem;
   align-items: center;
-  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
 }
 
-.btn-eliminar:hover {
-  background-color: #c82333;
-  transform: scale(1.1);
+.sin-gastos {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-color-secondary);
 }
 
 /* Control de presupuesto */
 .control-presupuesto {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.progreso {
-  margin: 1rem 0;
+.control-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
 }
 
-.barra-progreso {
-  width: 100%;
-  height: 20px;
-  background-color: #e9ecef;
+.control-stat {
+  padding: 0.85rem;
   border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
+  background: var(--surface-card);
+  text-align: center;
 }
 
-.progreso-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 10px;
+.control-stat .label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 0.25rem;
 }
 
-.btn-resetear {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 1rem;
-  transition: background-color 0.2s ease;
+.control-stat .valor {
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-.btn-resetear:hover {
-  background-color: #5a6268;
+.progreso-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin-top: 0.4rem;
 }
 
-/* Alerts mejorados */
-.alert {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
-  border: 1px solid transparent;
-}
-
-.alert-primary {
-  color: #004085;
-  background-color: #cce7ff;
-  border-color: #b3d9ff;
-}
-
-.alert-success {
-  color: #155724;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-}
-
-.alert-warning {
-  color: #856404;
-  background-color: #fff3cd;
-  border-color: #ffeaa7;
-}
-
-.alert-danger {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-}
-
-.alert-info {
-  color: #0c5460;
-  background-color: #d1ecf1;
-  border-color: #bee5eb;
-}
-
+/* Errores */
 .error {
-  animation: shake 0.5s ease-in-out;
+  animation: shake 0.4s ease-in-out;
 }
 
 @keyframes shake {
@@ -543,25 +456,21 @@ button:disabled {
   }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .listado-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+/* Responsive */
+@media (max-width: 640px) {
+  .app-header {
+    padding: 1.25rem;
   }
 
-  .gasto-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .control-stats {
+    grid-template-columns: 1fr;
   }
 
-  .gasto-detalles {
-    flex-direction: column;
-    gap: 0.25rem;
+  .acciones-presupuesto {
+    flex-wrap: wrap;
   }
 
-  .gasto-item {
-    padding: 0.75rem;
+  .acciones-presupuesto .p-button {
+    flex: 1 1 100%;
   }
 }

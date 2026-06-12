@@ -1,7 +1,11 @@
+import { Message } from 'primereact/message';
 import type { ErrorProps } from '../models/ErrorProps';
 
 export const Error = ({ mensaje }: ErrorProps) => (
-  <div className="alert alert-danger error" role="alert">
-    <strong>Error:</strong> {mensaje}
-  </div>
+  <Message
+    severity="error"
+    text={mensaje}
+    className="error"
+    style={{ width: '100%', justifyContent: 'flex-start', marginBottom: '1rem' }}
+  />
 );

@@ -1,4 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Toast } from 'primereact/toast';
+import { ConfirmDialog } from 'primereact/confirmdialog';
+import { Button } from 'primereact/button';
 // Componentes
 import { Pregunta } from './components/Pregunta';
 import { Formulario } from './components/Formulario';
@@ -8,46 +11,38 @@ import { GestorPresupuestos } from './components/GestorPresupuestos';
 import type { Presupuesto } from './models/Presupuesto';
 import type { Gasto } from './models/Gasto';
 
+// Lee los presupuestos del localStorage y convierte las fechas de string a Date
+const cargarPresupuestos = (): Presupuesto[] => {
+  const presupuestosGuardados = localStorage.getItem('presupuestos');
+  if (!presupuestosGuardados) return [];
+
+  const presupuestosArray = JSON.parse(presupuestosGuardados) as Presupuesto[];
+  return presupuestosArray.map(p => ({
+    ...p,
+    fechaCreacion: new Date(p.fechaCreacion),
+    gastos: p.gastos.map(g => ({
+      ...g,
+      fecha: new Date(g.fecha),
+    })),
+  }));
+};
+
 function App() {
-  // Estados principales
-  const [presupuestos, setPresupuestos] = useState<Presupuesto[]>([]);
-  const [presupuestoActivo, setPresupuestoActivo] = useState<Presupuesto | null>(null);
-  const [vista, setVista] = useState<'lista' | 'crear' | 'gastos'>('lista');
+  const toast = useRef<Toast>(null);
 
-  // Cargar presupuestos del localStorage al iniciar
-  useEffect(() => {
-    const presupuestosGuardados = localStorage.getItem('presupuestos');
+  // Estados principales (inicializados de forma perezosa desde localStorage)
+  const [presupuestos, setPresupuestos] = useState<Presupuesto[]>(cargarPresupuestos);
+
+  const [presupuestoActivo, setPresupuestoActivo] = useState<Presupuesto | null>(() => {
     const presupuestoActivoId = localStorage.getItem('presupuestoActivoId');
+    return presupuestos.find(p => p.id === presupuestoActivoId) ?? null;
+  });
 
-    if (presupuestosGuardados) {
-      const presupuestosArray = JSON.parse(presupuestosGuardados) as Presupuesto[];
-      // Convertir fechas de string a Date
-      const presupuestosConFechas = presupuestosArray.map(p => ({
-        ...p,
-        fechaCreacion: new Date(p.fechaCreacion),
-        gastos: p.gastos.map(g => ({
-          ...g,
-          fecha: new Date(g.fecha),
-        })),
-      }));
-
-      setPresupuestos(presupuestosConFechas);
-
-      if (presupuestoActivoId) {
-        const activo = presupuestosConFechas.find(p => p.id === presupuestoActivoId);
-        if (activo) {
-          setPresupuestoActivo(activo);
-          setVista('gastos');
-        }
-      }
-    }
-  }, []);
+  const [vista, setVista] = useState<'lista' | 'crear' | 'gastos'>(() => (presupuestoActivo ? 'gastos' : 'lista'));
 
   // Guardar presupuestos en localStorage
   useEffect(() => {
-    if (presupuestos.length > 0) {
-      localStorage.setItem('presupuestos', JSON.stringify(presupuestos));
-    }
+    localStorage.setItem('presupuestos', JSON.stringify(presupuestos));
   }, [presupuestos]);
 
   // Guardar presupuesto activo
@@ -73,6 +68,8 @@ function App() {
 
     setPresupuestoActivo(nuevoPresupuesto);
     setVista('gastos');
+
+    toast.current?.show({ severity: 'success', summary: 'Presupuesto creado', detail: `"${nombre}" está listo` });
   }, []);
 
   // Seleccionar presupuesto activo
@@ -108,25 +105,25 @@ function App() {
             : null
         );
       }
+
+      toast.current?.show({ severity: 'success', summary: 'Presupuesto actualizado', detail: nuevoNombre });
     },
     [presupuestoActivo]
   );
 
   // Eliminar presupuesto
   const eliminarPresupuesto = useCallback(
-    (id: string) => {
-      setPresupuestos(prev => {
-        const nuevosPresupuestos = prev.filter(p => p.id !== id);
+    (id: string, nombre: string) => {
+      setPresupuestos(prev => prev.filter(p => p.id !== id));
 
-        // Si eliminamos el activo, resetear
-        if (presupuestoActivo?.id === id) {
-          setPresupuestoActivo(null);
-          setVista('lista');
-          localStorage.removeItem('presupuestoActivoId');
-        }
+      // Si eliminamos el activo, resetear
+      if (presupuestoActivo?.id === id) {
+        setPresupuestoActivo(null);
+        setVista('lista');
+        localStorage.removeItem('presupuestoActivoId');
+      }
 
-        return nuevosPresupuestos;
-      });
+      toast.current?.show({ severity: 'info', summary: 'Presupuesto eliminado', detail: nombre });
     },
     [presupuestoActivo]
   );
@@ -150,6 +147,8 @@ function App() {
       setPresupuestos(prev => prev.map(p => (p.id === presupuestoActivo.id ? presupuestoActualizado : p)));
 
       setPresupuestoActivo(presupuestoActualizado);
+
+      toast.current?.show({ severity: 'success', summary: 'Gasto añadido', detail: gastoCompleto.nombre });
     },
     [presupuestoActivo]
   );
@@ -167,6 +166,8 @@ function App() {
       setPresupuestos(prev => prev.map(p => (p.id === presupuestoActivo.id ? presupuestoActualizado : p)));
 
       setPresupuestoActivo(presupuestoActualizado);
+
+      toast.current?.show({ severity: 'info', summary: 'Gasto eliminado' });
     },
     [presupuestoActivo]
   );
@@ -185,52 +186,50 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <header>
-        <h1>Gestor de Gastos</h1>
-        <hr></hr>
-        <div className="contenido-principal contenido">
-          {vista === 'lista' && (
-            <GestorPresupuestos
-              presupuestos={presupuestos}
-              onSeleccionar={seleccionarPresupuesto}
-              onModificar={modificarPresupuesto}
-              onEliminar={eliminarPresupuesto}
-              onNuevo={() => setVista('crear')}
-            />
-          )}
+    <div className="app-shell">
+      <Toast ref={toast} position="top-right" />
+      <ConfirmDialog />
 
-          {vista === 'crear' && (
-            <Pregunta onEstablecerPresupuesto={crearPresupuesto} onVolver={() => setVista('lista')} esNuevo={true} />
-          )}
-
-          {vista === 'gastos' && presupuestoActivo && (
-            <>
-              <div className="navegacion">
-                <h2>{presupuestoActivo.nombre}</h2>
-                <button className="btn-volver" onClick={volverALista}>
-                  ← Volver
-                </button>
-              </div>
-
-              <div className="row">
-                <div className="one-half column">
-                  <Formulario onAgregarGasto={agregarGasto} restante={calcularRestante()} />
-                </div>
-                <div className="one-half column">
-                  <Listado gastos={presupuestoActivo.gastos} onEliminarGasto={eliminarGasto} />
-                  <ControlPresupuesto
-                    presupuesto={presupuestoActivo.cantidad}
-                    restante={calcularRestante()}
-                    onResetear={() => {}} // No usado en múltiples presupuestos
-                    esMultiple={true}
-                  />
-                </div>
-              </div>
-            </>
-          )}
+      <header className="app-header">
+        <i className="pi pi-wallet"></i>
+        <div>
+          <h1>Gestor de Gastos</h1>
+          <p>Controla tus presupuestos y gastos de forma sencilla</p>
         </div>
       </header>
+
+      <main>
+        {vista === 'lista' && (
+          <GestorPresupuestos
+            presupuestos={presupuestos}
+            onSeleccionar={seleccionarPresupuesto}
+            onModificar={modificarPresupuesto}
+            onEliminar={eliminarPresupuesto}
+            onNuevo={() => setVista('crear')}
+          />
+        )}
+
+        {vista === 'crear' && (
+          <Pregunta onEstablecerPresupuesto={crearPresupuesto} onVolver={() => setVista('lista')} esNuevo={true} />
+        )}
+
+        {vista === 'gastos' && presupuestoActivo && (
+          <>
+            <div className="navegacion">
+              <h2>{presupuestoActivo.nombre}</h2>
+              <Button label="Volver" icon="pi pi-arrow-left" outlined onClick={volverALista} />
+            </div>
+
+            <div className="vista-gastos">
+              <Formulario onAgregarGasto={agregarGasto} restante={calcularRestante()} />
+              <div>
+                <Listado gastos={presupuestoActivo.gastos} onEliminarGasto={eliminarGasto} />
+                <ControlPresupuesto presupuesto={presupuestoActivo.cantidad} restante={calcularRestante()} />
+              </div>
+            </div>
+          </>
+        )}
+      </main>
     </div>
   );
 }

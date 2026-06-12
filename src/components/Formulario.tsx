@@ -1,12 +1,18 @@
 import { useState, FormEvent } from 'react';
+import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
+import { Button } from 'primereact/button';
+import { Card } from 'primereact/card';
 import { Error } from './Error';
+import { formatearMoneda } from '../helpers/helpers';
 import type { FormularioProps } from '../models/FormularioProps';
 
 const categorias = ['Alimentación', 'Transporte', 'Entretenimiento', 'Salud', 'Educación', 'Hogar', 'Ropa', 'Otros'];
 
 export const Formulario = ({ onAgregarGasto, restante }: FormularioProps) => {
   const [nombre, setNombre] = useState<string>('');
-  const [cantidad, setCantidad] = useState<string>('');
+  const [cantidad, setCantidad] = useState<number | null>(null);
   const [categoria, setCategoria] = useState<string>('');
   const [error, setError] = useState<string>('');
 
@@ -19,14 +25,12 @@ export const Formulario = ({ onAgregarGasto, restante }: FormularioProps) => {
       return 'El nombre debe tener al menos 3 caracteres';
     }
 
-    const cantidadNum = Number(cantidad);
-
-    if (!cantidad || isNaN(cantidadNum) || cantidadNum <= 0) {
+    if (cantidad === null || cantidad <= 0) {
       return 'La cantidad debe ser un número mayor a 0';
     }
 
-    if (cantidadNum > restante) {
-      return `La cantidad no puede ser mayor al presupuesto restante (€${restante.toFixed(2)})`;
+    if (cantidad > restante) {
+      return `La cantidad no puede ser mayor al presupuesto restante (${formatearMoneda(restante)})`;
     }
 
     if (!categoria) {
@@ -45,30 +49,17 @@ export const Formulario = ({ onAgregarGasto, restante }: FormularioProps) => {
       return;
     }
 
-    // Crear el gasto
-    const nuevoGasto = {
+    onAgregarGasto({
       nombre: nombre.trim(),
-      cantidad: Number(cantidad),
+      cantidad: cantidad as number,
       categoria,
-    };
-
-    onAgregarGasto(nuevoGasto);
+    });
 
     // Resetear formulario
     setNombre('');
-    setCantidad('');
+    setCantidad(null);
     setCategoria('');
     setError('');
-  };
-
-  const manejarCambioCantidad = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value;
-
-    // Solo permitir números y punto decimal
-    if (valor === '' || /^\d*\.?\d*$/.test(valor)) {
-      setCantidad(valor);
-      if (error) setError('');
-    }
   };
 
   const manejarCambioNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,66 +67,70 @@ export const Formulario = ({ onAgregarGasto, restante }: FormularioProps) => {
     if (error) setError('');
   };
 
-  const manejarCambioCategoria = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategoria(e.target.value);
+  const manejarCambioCantidad = (valor: number | null) => {
+    setCantidad(valor);
+    if (error) setError('');
+  };
+
+  const manejarCambioCategoria = (valor: string) => {
+    setCategoria(valor);
     if (error) setError('');
   };
 
   return (
-    <form onSubmit={manejarSubmit}>
-      <h2>Añade tus gastos aquí</h2>
+    <Card title="Añade tus gastos aquí">
+      <form onSubmit={manejarSubmit}>
+        {error && <Error mensaje={error} />}
 
-      {error && <Error mensaje={error} />}
+        <div className="campo">
+          <label htmlFor="nombre-gasto">Nombre del Gasto</label>
+          <InputText
+            id="nombre-gasto"
+            placeholder="Ej. Cena en restaurante"
+            value={nombre}
+            onChange={manejarCambioNombre}
+            maxLength={50}
+          />
+        </div>
 
-      <div className="campo">
-        <label htmlFor="nombre-gasto">Nombre del Gasto</label>
-        <input
-          id="nombre-gasto"
-          type="text"
-          className="u-full-width"
-          placeholder="Ej. Cena en restaurante"
-          value={nombre}
-          onChange={manejarCambioNombre}
-          maxLength={50}
+        <div className="campo">
+          <label htmlFor="cantidad-gasto">Cantidad</label>
+          <InputNumber
+            id="cantidad-gasto"
+            placeholder="Ej. 25,50 €"
+            value={cantidad}
+            onValueChange={e => manejarCambioCantidad(e.value ?? null)}
+            mode="currency"
+            currency="EUR"
+            locale="es-ES"
+            min={0}
+          />
+        </div>
+
+        <div className="campo">
+          <label htmlFor="categoria">Categoría</label>
+          <Dropdown
+            id="categoria"
+            value={categoria}
+            options={categorias}
+            placeholder="Selecciona una categoría"
+            onChange={e => manejarCambioCategoria(e.value)}
+          />
+        </div>
+
+        <div className="info-restante">
+          <span>Presupuesto restante</span>
+          <strong className={restante < 0 ? 'money-negative' : 'money-positive'}>{formatearMoneda(restante)}</strong>
+        </div>
+
+        <Button
+          type="submit"
+          label="Añadir Gasto"
+          icon="pi pi-plus"
+          className="btn-full"
+          disabled={!nombre.trim() || cantidad === null || !categoria}
         />
-      </div>
-
-      <div className="campo">
-        <label htmlFor="cantidad-gasto">Cantidad (€)</label>
-        <input
-          id="cantidad-gasto"
-          type="text"
-          className="u-full-width"
-          placeholder="Ej. 25.50"
-          value={cantidad}
-          onChange={manejarCambioCantidad}
-        />
-      </div>
-
-      <div className="campo">
-        <label htmlFor="categoria">Categoría</label>
-        <select id="categoria" className="u-full-width" value={categoria} onChange={manejarCambioCategoria}>
-          <option value="">Selecciona una categoría</option>
-          {categorias.map(cat => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="campo info-restante">
-        <small>
-          Presupuesto restante: <strong>€{restante.toFixed(2)}</strong>
-        </small>
-      </div>
-
-      <button
-        type="submit"
-        className="button-primary u-full-width"
-        disabled={!nombre.trim() || !cantidad || !categoria}>
-        Añadir Gasto
-      </button>
-    </form>
+      </form>
+    </Card>
   );
 };

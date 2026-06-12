@@ -1,3 +1,6 @@
+import { Tag } from 'primereact/tag';
+import { Button } from 'primereact/button';
+import { formatearMoneda } from '../helpers/helpers';
 import type { GastoProps } from '../models/GastoProps';
 
 export const Gasto = ({ gasto, onEliminar }: GastoProps) => {
@@ -14,20 +17,21 @@ export const Gasto = ({ gasto, onEliminar }: GastoProps) => {
       <div className="gasto-info">
         <div className="gasto-header">
           <h4>{gasto.nombre}</h4>
-          <span className="gasto-cantidad">€{gasto.cantidad.toFixed(2)}</span>
+          <span className="gasto-cantidad">{formatearMoneda(gasto.cantidad)}</span>
         </div>
         <div className="gasto-detalles">
-          <small className="gasto-categoria">{gasto.categoria}</small>
-          <small className="gasto-fecha">{formatearFecha(gasto.fecha)}</small>
+          <Tag value={gasto.categoria} severity="info" />
+          <span>{formatearFecha(gasto.fecha)}</span>
         </div>
       </div>
-      <button
-        className="btn-accion btn-eliminar-pequeno"
+      <Button
+        icon="pi pi-trash"
+        rounded
+        text
+        severity="danger"
+        aria-label={`Eliminar gasto ${gasto.nombre}`}
         onClick={() => onEliminar(gasto.id)}
-        title={`Eliminar gasto: ${gasto.nombre}`}
-        aria-label={`Eliminar gasto ${gasto.nombre}`}>
-        ✕
-      </button>
+      />
     </li>
   );
 };
