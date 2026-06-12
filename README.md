@@ -29,6 +29,14 @@ Una aplicación web moderna y completa para gestionar múltiples presupuestos pe
 - **Navegación fluida** - Interfaz intuitiva y fácil de usar
 - **Diseño responsive** - Funciona perfectamente en móviles y escritorio
 - **Experiencia optimizada** - Carga rápida y transiciones suaves
+- **Notificaciones Toast** - Feedback visual inmediato al crear, editar o eliminar presupuestos y gastos
+- **Confirmaciones seguras** - Diálogos de confirmación antes de cualquier acción destructiva
+
+### 🎨 Interfaz Profesional
+- **Tema oscuro "dark fintech"** - Basado en PrimeReact (`lara-dark-teal`) con acentos en verde teal
+- **Semántica de color del dinero** - Verde para saldos positivos, rojo para gastos/saldos negativos, ámbar para avisos
+- **Componentes PrimeReact** - Cards, Tags, ProgressBar, Dropdown, InputNumber con formato de moneda EUR
+- **Tipografía Inter** - Look moderno y profesional en toda la aplicación
 
 ## 🚀 Demo en Vivo
 
@@ -36,18 +44,20 @@ Una aplicación web moderna y completa para gestionar múltiples presupuestos pe
 
 ## 🛠️ Tecnologías Utilizadas
 
-- **Frontend**: React 18+ con TypeScript
-- **Build Tool**: Vite 4+
-- **Estilo**: CSS3 con Flexbox y Grid
+- **Frontend**: React 19 con TypeScript
+- **UI**: PrimeReact 10 (tema `lara-dark-teal`) + PrimeIcons
+- **Build Tool**: Vite 8
+- **Gestor de paquetes**: pnpm
+- **Estilo**: CSS3 (Flexbox y Grid) sobre tema oscuro PrimeReact + tipografía Inter
 - **Almacenamiento**: LocalStorage API
 - **Validación**: Validación en tiempo real
-- **UX**: Diseño responsive y accesible
+- **UX**: Toast y ConfirmDialog (PrimeReact) para notificaciones y confirmaciones, diseño responsive y accesible
 
 ## 📦 Instalación y Uso
 
 ### Prerrequisitos
-- Node.js 16+ 
-- npm o yarn
+- Node.js 20+
+- pnpm 11+
 
 ### Instalación
 ```bash
@@ -55,25 +65,28 @@ Una aplicación web moderna y completa para gestionar múltiples presupuestos pe
 git clone https://github.com/cmurestudillos/gestor-de-gastos.git
 
 # Navegar al directorio
-cd gestor-de gastos
+cd gestor-de-gastos
 
 # Instalar dependencias
-npm install
+pnpm install
 
 # Ejecutar en desarrollo
-npm run dev
+pnpm dev
 
 # Construir para producción
-npm run build
+pnpm build
 ```
 
 ### Scripts Disponibles
 ```bash
-npm run dev          # Servidor de desarrollo
-npm run build        # Construir para producción
-npm run preview      # Vista previa de la build
-npm run lint         # Linter de código
-npm run type-check   # Verificación de tipos TypeScript
+pnpm dev            # Servidor de desarrollo
+pnpm build          # Construir para producción
+pnpm preview        # Vista previa de la build
+pnpm lint           # Linter de código
+pnpm lint:fix       # Corregir problemas de lint automáticamente
+pnpm format         # Formatear con Prettier
+pnpm format:check   # Verificar formato con Prettier
+pnpm type-check     # Verificación de tipos TypeScript
 ```
 
 ## 🎮 Guía de Uso
@@ -148,7 +161,6 @@ src/
 - [ ] **Exportación de datos** a CSV/Excel
 - [ ] **Metas de ahorro** personalizables
 - [ ] **Notificaciones push** para límites
-- [ ] **Modo oscuro** y temas personalizables
 - [ ] **Sincronización en la nube** (opcional)
 - [ ] **Categorías personalizadas** por usuario
 - [ ] **Reportes mensuales** automatizados

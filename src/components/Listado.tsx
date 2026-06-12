@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Dropdown } from 'primereact/dropdown';
 import type { ListadoProps } from '../models/ListadoProps';
 import { Gasto } from './Gasto';
+import { formatearMoneda } from '../helpers/helpers';
 
 export const Listado = ({ gastos, onEliminarGasto }: ListadoProps) => {
   const [filtroCategoria, setFiltroCategoria] = useState<string>('');
@@ -32,21 +34,21 @@ export const Listado = ({ gastos, onEliminarGasto }: ListadoProps) => {
       <div className="listado-header">
         <h2>Listado de Gastos</h2>
         <p className="total-gastos">
-          Total {filtroCategoria ? `en ${filtroCategoria}` : ''}:<strong> €{totalGastos.toFixed(2)}</strong>
+          Total {filtroCategoria ? `en ${filtroCategoria}` : ''}: <strong>{formatearMoneda(totalGastos)}</strong>
         </p>
       </div>
 
       {categorias.length > 1 && (
         <div className="filtro-categoria">
-          <label htmlFor="filtro">Filtrar por categoría:</label>
-          <select id="filtro" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}>
-            <option value="">Todas las categorías</option>
-            {categorias.map(categoria => (
-              <option key={categoria} value={categoria}>
-                {categoria}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="filtro">Filtrar por categoría</label>
+          <Dropdown
+            id="filtro"
+            value={filtroCategoria}
+            options={categorias}
+            placeholder="Todas las categorías"
+            showClear
+            onChange={e => setFiltroCategoria(e.value ?? '')}
+          />
         </div>
       )}
 

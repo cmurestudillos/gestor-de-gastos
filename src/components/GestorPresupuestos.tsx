@@ -1,4 +1,12 @@
 import { useState } from 'react';
+import { Card } from 'primereact/card';
+import { Tag } from 'primereact/tag';
+import { ProgressBar } from 'primereact/progressbar';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
+import { confirmDialog } from 'primereact/confirmdialog';
+import { esNumeroValido, formatearMoneda } from '../helpers/helpers';
 import type { GestorPresupuestosProps } from '../models/GestorPresupuestosProps';
 import type { PresupuestoEnEdicion } from '../models/PresupuestoEnEdicion';
 import type { Presupuesto } from '../models/Presupuesto';
@@ -32,14 +40,7 @@ export const GestorPresupuestos = ({
   };
 
   const guardarEdicion = () => {
-    const cantidad = Number(formEdicion.cantidad);
-
-    if (!formEdicion.nombre.trim() || isNaN(cantidad) || cantidad <= 0) {
-      alert('Por favor, ingresa datos válidos');
-      return;
-    }
-
-    onModificar(formEdicion.id, formEdicion.nombre.trim(), cantidad);
+    onModificar(formEdicion.id, formEdicion.nombre.trim(), Number(formEdicion.cantidad));
     setEditando(null);
   };
 
@@ -47,12 +48,18 @@ export const GestorPresupuestos = ({
     const totalGastos = presupuesto.gastos.reduce((total, gasto) => total + gasto.cantidad, 0);
     const mensaje =
       totalGastos > 0
-        ? `¿Estás seguro de eliminar "${presupuesto.nombre}"? Tiene ${presupuesto.gastos.length} gastos por un total de €${totalGastos.toFixed(2)}.`
-        : `¿Estás seguro de eliminar "${presupuesto.nombre}"?`;
+        ? `Tiene ${presupuesto.gastos.length} gastos por un total de ${formatearMoneda(totalGastos)}. Esta acción no se puede deshacer.`
+        : 'Esta acción no se puede deshacer.';
 
-    if (confirm(mensaje)) {
-      onEliminar(presupuesto.id);
-    }
+    confirmDialog({
+      message: `¿Seguro que quieres eliminar "${presupuesto.nombre}"? ${mensaje}`,
+      header: 'Confirmar eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Eliminar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-button-danger',
+      accept: () => onEliminar(presupuesto.id, presupuesto.nombre),
+    });
   };
 
   const calcularEstadisticas = (presupuesto: Presupuesto) => {
@@ -61,6 +68,12 @@ export const GestorPresupuestos = ({
     const porcentajeUsado = presupuesto.cantidad > 0 ? (totalGastos / presupuesto.cantidad) * 100 : 0;
 
     return { totalGastos, restante, porcentajeUsado };
+  };
+
+  const colorProgreso = (porcentajeUsado: number) => {
+    if (porcentajeUsado > 90) return '#ef4444';
+    if (porcentajeUsado > 75) return '#f59e0b';
+    return '#22c55e';
   };
 
   const formatearFecha = (fecha: Date) => {
@@ -74,13 +87,10 @@ export const GestorPresupuestos = ({
   if (presupuestos.length === 0) {
     return (
       <div className="gestor-vacio">
-        <div className="mensaje-vacio">
-          <h2>¡Bienvenido!</h2>
-          <p>No tienes presupuestos creados aún.</p>
-          <button className="button-primary" onClick={onNuevo}>
-            Crear Mi Primer Presupuesto
-          </button>
-        </div>
+        <i className="pi pi-wallet" style={{ fontSize: '3rem', color: 'var(--primary-color)' }}></i>
+        <h2>¡Bienvenido!</h2>
+        <p>No tienes presupuestos creados aún.</p>
+        <Button label="Crear Mi Primer Presupuesto" icon="pi pi-plus" onClick={onNuevo} />
       </div>
     );
   }
@@ -89,9 +99,7 @@ export const GestorPresupuestos = ({
     <div className="gestor-presupuestos">
       <div className="header-gestor">
         <h2>Mis Presupuestos</h2>
-        <button className="button-primary btn-nuevo" onClick={onNuevo}>
-          + Nuevo Presupuesto
-        </button>
+        <Button label="Nuevo Presupuesto" icon="pi pi-plus" onClick={onNuevo} />
       </div>
 
       <div className="grid-presupuestos">
@@ -100,76 +108,69 @@ export const GestorPresupuestos = ({
           const esEditando = editando === presupuesto.id;
 
           return (
-            <div key={presupuesto.id} className={`tarjeta-presupuesto ${presupuesto.activo ? 'activo' : ''}`}>
+            <Card key={presupuesto.id} className={`tarjeta-presupuesto ${presupuesto.activo ? 'activo' : ''}`}>
               {esEditando ? (
                 <div className="edicion-presupuesto">
-                  <input
-                    type="text"
+                  <InputText
                     value={formEdicion.nombre}
-                    onChange={e =>
-                      setFormEdicion(prev => ({
-                        ...prev,
-                        nombre: e.target.value,
-                      }))
-                    }
-                    className="input-edicion"
+                    onChange={e => setFormEdicion(prev => ({ ...prev, nombre: e.target.value }))}
                     placeholder="Nombre del presupuesto"
                   />
-                  <input
-                    type="number"
-                    value={formEdicion.cantidad}
-                    onChange={e =>
-                      setFormEdicion(prev => ({
-                        ...prev,
-                        cantidad: e.target.value,
-                      }))
-                    }
-                    className="input-edicion"
+                  <InputNumber
+                    value={formEdicion.cantidad === '' ? null : Number(formEdicion.cantidad)}
+                    onValueChange={e => setFormEdicion(prev => ({ ...prev, cantidad: (e.value ?? '').toString() }))}
+                    mode="currency"
+                    currency="EUR"
+                    locale="es-ES"
                     placeholder="Cantidad"
-                    step="0.01"
-                    min="0.01"
                   />
                   <div className="botones-edicion">
-                    <button className="btn-guardar" onClick={guardarEdicion}>
-                      ✓
-                    </button>
-                    <button className="btn-cancelar" onClick={cancelarEdicion}>
-                      ✕
-                    </button>
+                    <Button
+                      label="Guardar"
+                      icon="pi pi-check"
+                      severity="success"
+                      disabled={!formEdicion.nombre.trim() || !esNumeroValido(formEdicion.cantidad)}
+                      onClick={guardarEdicion}
+                    />
+                    <Button
+                      label="Cancelar"
+                      icon="pi pi-times"
+                      severity="secondary"
+                      outlined
+                      onClick={cancelarEdicion}
+                    />
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="header-tarjeta">
                     <h3>{presupuesto.nombre}</h3>
-                    {presupuesto.activo && <span className="badge-activo">Activo</span>}
+                    {presupuesto.activo && <Tag value="Activo" icon="pi pi-star-fill" severity="info" />}
                   </div>
 
                   <div className="stats-presupuesto">
-                    <div className="stat">
-                      <span className="label">Presupuesto:</span>
-                      <span className="valor">€{presupuesto.cantidad.toFixed(2)}</span>
+                    <div className="stat-row">
+                      <span className="label">Presupuesto</span>
+                      <span className="valor">{formatearMoneda(presupuesto.cantidad)}</span>
                     </div>
-                    <div className="stat">
-                      <span className="label">Gastado:</span>
-                      <span className="valor gastado">€{totalGastos.toFixed(2)}</span>
+                    <div className="stat-row">
+                      <span className="label">Gastado</span>
+                      <span className="valor money-spent">{formatearMoneda(totalGastos)}</span>
                     </div>
-                    <div className="stat">
-                      <span className="label">Restante:</span>
-                      <span className={`valor ${restante < 0 ? 'negativo' : 'positivo'}`}>€{restante.toFixed(2)}</span>
+                    <div className="stat-row">
+                      <span className="label">Restante</span>
+                      <span className={`valor ${restante < 0 ? 'money-negative' : 'money-positive'}`}>
+                        {formatearMoneda(restante)}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="progreso-mini">
-                    <div
-                      className="barra-progreso-mini"
-                      style={{
-                        width: `${Math.min(porcentajeUsado, 100)}%`,
-                        backgroundColor:
-                          porcentajeUsado > 90 ? '#dc3545' : porcentajeUsado > 75 ? '#ffc107' : '#28a745',
-                      }}
-                    />
-                  </div>
+                  <ProgressBar
+                    value={Math.min(porcentajeUsado, 100)}
+                    showValue={false}
+                    color={colorProgreso(porcentajeUsado)}
+                    style={{ height: '8px' }}
+                  />
 
                   <div className="info-adicional">
                     <small>
@@ -178,21 +179,25 @@ export const GestorPresupuestos = ({
                   </div>
 
                   <div className="acciones-presupuesto">
-                    <button className="btn-accion btn-seleccionar" onClick={() => onSeleccionar(presupuesto)}>
-                      Gestionar
-                    </button>
-                    <button className="btn-accion btn-editar" onClick={() => iniciarEdicion(presupuesto)}>
-                      Editar
-                    </button>
-                    <button
-                      className="btn-accion btn-eliminar-presupuesto"
-                      onClick={() => confirmarEliminacion(presupuesto)}>
-                      Eliminar
-                    </button>
+                    <Button label="Gestionar" icon="pi pi-arrow-right" onClick={() => onSeleccionar(presupuesto)} />
+                    <Button
+                      icon="pi pi-pencil"
+                      outlined
+                      severity="secondary"
+                      aria-label="Editar"
+                      onClick={() => iniciarEdicion(presupuesto)}
+                    />
+                    <Button
+                      icon="pi pi-trash"
+                      outlined
+                      severity="danger"
+                      aria-label="Eliminar"
+                      onClick={() => confirmarEliminacion(presupuesto)}
+                    />
                   </div>
                 </>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>
@@ -201,21 +206,25 @@ export const GestorPresupuestos = ({
         <h3>Resumen General</h3>
         <div className="stats-generales">
           <div className="stat-general">
-            <strong>Total Presupuestado:</strong>
-            <span>€{presupuestos.reduce((total, p) => total + p.cantidad, 0).toFixed(2)}</span>
-          </div>
-          <div className="stat-general">
-            <strong>Total Gastado:</strong>
-            <span>
-              €
-              {presupuestos
-                .reduce((total, p) => total + p.gastos.reduce((gastoTotal, g) => gastoTotal + g.cantidad, 0), 0)
-                .toFixed(2)}
+            <span className="stat-label">Total Presupuestado</span>
+            <span className="stat-value">
+              {formatearMoneda(presupuestos.reduce((total, p) => total + p.cantidad, 0))}
             </span>
           </div>
           <div className="stat-general">
-            <strong>Presupuestos Activos:</strong>
-            <span>{presupuestos.length}</span>
+            <span className="stat-label">Total Gastado</span>
+            <span className="stat-value money-spent">
+              {formatearMoneda(
+                presupuestos.reduce(
+                  (total, p) => total + p.gastos.reduce((gastoTotal, g) => gastoTotal + g.cantidad, 0),
+                  0
+                )
+              )}
+            </span>
+          </div>
+          <div className="stat-general">
+            <span className="stat-label">Total de Presupuestos</span>
+            <span className="stat-value">{presupuestos.length}</span>
           </div>
         </div>
       </div>

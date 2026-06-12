@@ -1,16 +1,18 @@
 import { useState, FormEvent } from 'react';
+import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber';
+import { Button } from 'primereact/button';
+import { Card } from 'primereact/card';
 import { Error } from './Error';
 import type { PreguntaProps } from '../models/PreguntaProps';
 
 export const Pregunta = ({ onEstablecerPresupuesto, onVolver, esNuevo = false }: PreguntaProps) => {
   const [nombre, setNombre] = useState<string>('');
-  const [cantidad, setCantidad] = useState<string>('');
+  const [cantidad, setCantidad] = useState<number | null>(null);
   const [error, setError] = useState<string>('');
 
   const manejarSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const cantidadNum = Number(cantidad);
 
     // Validaciones mejoradas
     if (!nombre.trim()) {
@@ -23,24 +25,19 @@ export const Pregunta = ({ onEstablecerPresupuesto, onVolver, esNuevo = false }:
       return;
     }
 
-    if (!cantidad.trim()) {
-      setError('La cantidad es obligatoria');
-      return;
-    }
-
-    if (isNaN(cantidadNum) || cantidadNum <= 0) {
+    if (cantidad === null || cantidad <= 0) {
       setError('El presupuesto debe ser un número mayor a 0');
       return;
     }
 
-    if (cantidadNum > 1000000) {
+    if (cantidad > 1000000) {
       setError('El presupuesto no puede ser mayor a €1,000,000');
       return;
     }
 
     // Si pasa las validaciones
     setError('');
-    onEstablecerPresupuesto(nombre.trim(), cantidadNum);
+    onEstablecerPresupuesto(nombre.trim(), cantidad);
   };
 
   const manejarCambioNombre = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,34 +45,30 @@ export const Pregunta = ({ onEstablecerPresupuesto, onVolver, esNuevo = false }:
     if (error) setError('');
   };
 
-  const manejarCambioCantidad = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value;
-
-    // Solo permitir números y punto decimal
-    if (valor === '' || /^\d*\.?\d*$/.test(valor)) {
-      setCantidad(valor);
-      if (error) setError('');
-    }
+  const manejarCambioCantidad = (valor: number | null) => {
+    setCantidad(valor);
+    if (error) setError('');
   };
 
   return (
-    <>
+    <Card title={esNuevo ? 'Crear Nuevo Presupuesto' : 'Presupuesto Mensual'}>
       {onVolver && (
-        <button className="btn-volver" onClick={onVolver}>
-          ← Volver
-        </button>
+        <Button
+          label="Volver"
+          icon="pi pi-arrow-left"
+          outlined
+          onClick={onVolver}
+          style={{ marginBottom: '1.25rem' }}
+        />
       )}
 
-      <h2>{esNuevo ? 'Crear Nuevo Presupuesto' : 'Presupuesto Mensual'}</h2>
       {error && <Error mensaje={error} />}
 
       <form onSubmit={manejarSubmit}>
         <div className="campo">
           <label htmlFor="nombre-presupuesto">Nombre del presupuesto</label>
-          <input
+          <InputText
             id="nombre-presupuesto"
-            type="text"
-            className="u-full-width"
             placeholder="Ej. Presupuesto Enero, Gastos Casa, etc."
             value={nombre}
             onChange={manejarCambioNombre}
@@ -85,21 +78,27 @@ export const Pregunta = ({ onEstablecerPresupuesto, onVolver, esNuevo = false }:
         </div>
 
         <div className="campo">
-          <label htmlFor="cantidad-presupuesto">Cantidad del presupuesto (€)</label>
-          <input
+          <label htmlFor="cantidad-presupuesto">Cantidad del presupuesto</label>
+          <InputNumber
             id="cantidad-presupuesto"
-            type="text"
-            className="u-full-width"
-            placeholder="Ej. 1500.50"
+            placeholder="Ej. 1.500,50 €"
             value={cantidad}
-            onChange={manejarCambioCantidad}
+            onValueChange={e => manejarCambioCantidad(e.value ?? null)}
+            mode="currency"
+            currency="EUR"
+            locale="es-ES"
+            min={0}
           />
         </div>
 
-        <button type="submit" className="button-primary u-full-width" disabled={!nombre.trim() || !cantidad.trim()}>
-          {esNuevo ? 'Crear Presupuesto' : 'Definir Presupuesto'}
-        </button>
+        <Button
+          type="submit"
+          label={esNuevo ? 'Crear Presupuesto' : 'Definir Presupuesto'}
+          icon="pi pi-check"
+          className="btn-full"
+          disabled={!nombre.trim() || cantidad === null}
+        />
       </form>
-    </>
+    </Card>
   );
 };
